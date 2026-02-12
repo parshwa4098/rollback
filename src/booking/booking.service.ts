@@ -14,16 +14,19 @@ export class BookingService {
     private sequelize: Sequelize,
   ) {}
 
-  async bookSeat(userId: number, seatId: number): Promise<Booking> {
+  async bookSeat(userId: number, id: number): Promise<Booking> {
     const transaction = await this.sequelize.transaction({
       isolationLevel: Transaction.ISOLATION_LEVELS.READ_COMMITTED,
     });
 
     try {
-      const seat = await this.seatModel.findByPk(seatId, {
+      console.log(id);
+
+      const seat = await this.seatModel.findByPk(id, {
         lock: Transaction.LOCK.UPDATE,
         transaction,
       });
+      console.log(seat);
 
       if (!seat) {
         throw new ConflictException('Seat not found');
@@ -35,7 +38,7 @@ export class BookingService {
 
       const existingBooking = await this.bookingModel.findOne({
         where: {
-          seat_id: seatId,
+          seat_id: id,
           status: 'confirmed',
         },
         transaction,
@@ -48,7 +51,7 @@ export class BookingService {
       const booking = await this.bookingModel.create(
         {
           user_id: userId,
-          seat_id: seatId,
+          seat_id: id,
           status: 'confirmed',
         },
         { transaction },
