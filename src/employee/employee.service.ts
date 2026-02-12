@@ -65,11 +65,13 @@ export class EmployeeService {
         transaction,
         lock: true,
       });
+      console.log('transaction working');
 
       const toUser = await this.recordsModel.findByPk(dto.toUserId, {
         transaction,
         lock: true,
       });
+      console.log('transaction working for second');
 
       if (!fromUser) {
         await transaction.rollback();
@@ -101,6 +103,8 @@ export class EmployeeService {
 
       if (newSenderBalance < 0) {
         await transaction.rollback();
+        console.log('rollback working');
+
         throw new BadRequestException(
           `Transfer would result in negative balance. Current: ${fromUser.balance}, Transfer: ${dto.amount}`,
         );
@@ -132,6 +136,8 @@ export class EmployeeService {
 
       if (senderUpdated === 0 || receiverUpdated === 0) {
         await transaction.rollback();
+        console.log('rollback working');
+
         throw new BadRequestException(
           'Transfer failed - could not update balances',
         );
@@ -162,6 +168,7 @@ export class EmployeeService {
       };
     } catch (error: any) {
       await transaction.rollback();
+      console.log('rollback working');
 
       if (error.name === 'SequelizeValidationError') {
         throw new BadRequestException(
